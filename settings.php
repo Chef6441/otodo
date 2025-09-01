@@ -12,6 +12,7 @@ $error = '';
 $username = $_SESSION['username'] ?? '';
 $location = $_SESSION['location'] ?? '';
 $default_priority = (int)($_SESSION['default_priority'] ?? 0);
+$special_prefixes = $_SESSION['special_prefixes'] ?? get_default_prefixes();
 $timezones = DateTimeZone::listIdentifiers();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -19,6 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $_POST['password'] ?? '';
     $location = trim($_POST['location'] ?? '');
     $default_priority = (int)($_POST['default_priority'] ?? 0);
+    $special_prefixes = str_replace("\r", '', $_POST['special_prefixes'] ?? $special_prefixes);
     if ($default_priority < 0 || $default_priority > 3) {
         $default_priority = 0;
     }
@@ -29,26 +31,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             if ($password !== '') {
                 $hash = password_hash($password, PASSWORD_DEFAULT);
-                $stmt = $db->prepare('UPDATE users SET username = :username, password = :password, location = :loc, default_priority = :pri WHERE id = :id');
+                $stmt = $db->prepare('UPDATE users SET username = :username, password = :password, location = :loc, default_priority = :pri, special_prefixes = :sp WHERE id = :id');
                 $stmt->execute([
                     ':username' => $username,
                     ':password' => $hash,
                     ':loc' => $location !== '' ? $location : null,
                     ':pri' => $default_priority,
+                    ':sp' => $special_prefixes,
                     ':id' => $_SESSION['user_id'],
                 ]);
             } else {
-                $stmt = $db->prepare('UPDATE users SET username = :username, location = :loc, default_priority = :pri WHERE id = :id');
+                $stmt = $db->prepare('UPDATE users SET username = :username, location = :loc, default_priority = :pri, special_prefixes = :sp WHERE id = :id');
                 $stmt->execute([
                     ':username' => $username,
                     ':loc' => $location !== '' ? $location : null,
                     ':pri' => $default_priority,
+                    ':sp' => $special_prefixes,
                     ':id' => $_SESSION['user_id'],
                 ]);
             }
             $_SESSION['username'] = $username;
             $_SESSION['location'] = $location !== '' ? $location : 'UTC';
             $_SESSION['default_priority'] = $default_priority;
+            $_SESSION['special_prefixes'] = $special_prefixes;
             $message = 'Settings saved';
         } catch (PDOException $e) {
             $error = 'Username already taken';
@@ -123,6 +128,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <option value="1" <?php if ($default_priority == 1) echo 'selected'; ?>>Low</option>
                 <option value="0" <?php if ($default_priority == 0) echo 'selected'; ?>>None</option>
             </select>
+        </div>
+        <div class="mb-3">
+            <label class="form-label" for="special_prefixes">Special Prefixes (one per line)</label>
+            <textarea name="special_prefixes" id="special_prefixes" class="form-control" rows="4"><?=htmlspecialchars($special_prefixes)?></textarea>
         </div>
         <button type="submit" class="btn btn-primary">Save</button>
         <a href="index.php" class="btn btn-secondary">Back</a>

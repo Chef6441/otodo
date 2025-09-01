@@ -13,6 +13,8 @@ $stmt->execute([':uid' => $_SESSION['user_id']]);
 $tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $priority_labels = [0 => 'None', 1 => 'Low', 2 => 'Medium', 3 => 'High'];
 $priority_classes = [0 => 'bg-secondary-subtle text-secondary', 1 => 'bg-success-subtle text-success', 2 => 'bg-warning-subtle text-warning', 3 => 'bg-danger-subtle text-danger'];
+$special_prefixes = $_SESSION['special_prefixes'] ?? get_default_prefixes();
+$prefix_array = array_values(array_filter(array_map(fn($p) => rtrim($p, "\r"), explode("\n", $special_prefixes)), fn($p) => $p !== ''));
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -93,7 +95,7 @@ $priority_classes = [0 => 'bg-secondary-subtle text-secondary', 1 => 'bg-success
                 }
             ?>
             <a href="task.php?id=<?=$task['id']?>" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                <span class="<?php if ($task['done']) echo 'text-decoration-line-through'; ?>"><?=htmlspecialchars(ucwords(strtolower($task['description'] ?? '')))?></span>
+                <span class="<?php if ($task['done']) echo 'text-decoration-line-through'; ?>"><?=htmlspecialchars($task['description'] ?? '')?></span>
                 <span class="d-flex align-items-center gap-2">
                     <span class="small due-date text-end <?=$dueClass?>"><?=htmlspecialchars($due)?></span>
                     <span class="badge <?=$priority_classes[$p]?> priority-badge"><?=$priority_labels[$p]?></span>
@@ -103,6 +105,22 @@ $priority_classes = [0 => 'bg-secondary-subtle text-secondary', 1 => 'bg-success
         <?php endforeach; ?>
     </div>
 </div>
+<script>
+const specialPrefixes = <?=json_encode($prefix_array)?>;
+(function(){
+  const input = document.querySelector('input[name="description"]');
+  if (!input) return;
+  input.addEventListener('input', function(){
+    const start = this.selectionStart;
+    let line = this.value;
+    const skip = specialPrefixes.some(p => line.startsWith(p)) || /^[\t ]/.test(line);
+    if (!skip) {
+      this.value = line.replace(/^([A-Za-z])/, c => c.toUpperCase());
+      this.selectionStart = this.selectionEnd = start;
+    }
+  });
+})();
+</script>
 <script src="sw-register.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
