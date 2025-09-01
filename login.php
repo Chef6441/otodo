@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($username === '' || $password === '') {
         $error = 'Please fill in all fields';
     } else {
-        $stmt = get_db()->prepare('SELECT id, password, location, default_priority FROM users WHERE username = :username');
+        $stmt = get_db()->prepare('SELECT id, password, location, default_priority, special_prefixes FROM users WHERE username = :username');
         $stmt->execute([':username' => $username]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
         if ($user && password_verify($password, $user['password'])) {
@@ -21,6 +21,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['username'] = $username;
             $_SESSION['location'] = $user['location'] ?? 'UTC';
             $_SESSION['default_priority'] = (int)($user['default_priority'] ?? 0);
+            $prefixes = $user['special_prefixes'] ?? "T \nN \nX \nC \nM \n# \n## \n### ";
+            $prefixes = str_replace("\r", "", $prefixes);
+            $_SESSION['special_prefixes'] = $prefixes;
             header('Location: index.php');
             exit();
         } else {
