@@ -1,10 +1,6 @@
 <?php
 session_start();
 
-function get_default_prefixes() {
-    return "T \nN \nX \nC \nM \n# \n## \n### ";
-}
-
 function get_db() {
     static $db = null;
     if ($db === null) {
@@ -16,8 +12,7 @@ function get_db() {
             username TEXT UNIQUE NOT NULL,
             password TEXT NOT NULL,
             location TEXT,
-            default_priority INTEGER NOT NULL DEFAULT 0,
-            special_prefixes TEXT
+            default_priority INTEGER NOT NULL DEFAULT 0
         )");
 
         $db->exec("CREATE TABLE IF NOT EXISTS tasks (
@@ -50,10 +45,6 @@ function get_db() {
         }
         if (!in_array('default_priority', $userColumns, true)) {
             $db->exec('ALTER TABLE users ADD COLUMN default_priority INTEGER NOT NULL DEFAULT 0');
-        }
-        if (!in_array('special_prefixes', $userColumns, true)) {
-            $db->exec('ALTER TABLE users ADD COLUMN special_prefixes TEXT');
-            $db->exec('UPDATE users SET special_prefixes = ' . $db->quote(get_default_prefixes()));
         }
     }
     return $db;

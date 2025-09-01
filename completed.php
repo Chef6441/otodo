@@ -105,7 +105,7 @@ $tomorrowFmt = $tomorrow->format('Y-m-d');
                 }
             ?>
             <div class="list-group-item d-flex align-items-start list-group-item-action" onclick="location.href='task.php?id=<?=$task['id']?>'" style="cursor: pointer;">
-                <span class="flex-grow-1 text-break text-decoration-line-through"><?=htmlspecialchars($task['description'] ?? '')?></span>
+                <span class="flex-grow-1 text-break text-decoration-line-through"><?=htmlspecialchars(ucwords(strtolower($task['description'] ?? '')))?></span>
                 <span class="d-flex align-items-center gap-2 ms-3 flex-shrink-0 text-nowrap">
                     <?php if ($due !== ''): ?>
                         <span class="small <?=$dueClass?>"><?=htmlspecialchars($due)?></span>

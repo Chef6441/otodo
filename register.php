@@ -15,12 +15,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         try {
             $hash = password_hash($password, PASSWORD_DEFAULT);
-            $stmt = get_db()->prepare('INSERT INTO users (username, password, default_priority, special_prefixes) VALUES (:username, :password, 0, :prefixes)');
-            $stmt->execute([
-                ':username' => $username,
-                ':password' => $hash,
-                ':prefixes' => get_default_prefixes()
-            ]);
+            $stmt = get_db()->prepare('INSERT INTO users (username, password, default_priority) VALUES (:username, :password, 0)');
+            $stmt->execute([':username' => $username, ':password' => $hash]);
             header('Location: login.php');
             exit();
         } catch (PDOException $e) {

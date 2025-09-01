@@ -16,11 +16,8 @@ if (!$task) {
     exit();
 }
 
-$special_prefixes = $_SESSION['special_prefixes'] ?? get_default_prefixes();
-$prefix_array = array_values(array_filter(array_map(fn($p) => rtrim($p, "\r"), explode("\n", $special_prefixes)), fn($p) => $p !== ''));
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $description = trim($_POST['description'] ?? '');
+    $description = ucwords(strtolower(trim($_POST['description'] ?? '')));
     $due_date = trim($_POST['due_date'] ?? '');
     $details = trim($_POST['details'] ?? '');
     $priority = (int)($_POST['priority'] ?? 0);
@@ -133,7 +130,7 @@ if ($p < 0 || $p > 3) { $p = 0; }
     <form method="post">
         <div class="mb-3">
             <label class="form-label">Title</label>
-            <input type="text" name="description" class="form-control" value="<?=htmlspecialchars($task['description'] ?? '')?>" required autocapitalize="none">
+            <input type="text" name="description" class="form-control" value="<?=htmlspecialchars(ucwords(strtolower($task['description'] ?? '')))?>" required autocapitalize="none">
         </div>
         <div class="mb-3 d-flex align-items-end gap-3">
             <div>
@@ -195,29 +192,13 @@ if ($p < 0 || $p > 3) { $p = 0; }
     }
   }
 
-  const specialPrefixes = <?=json_encode($prefix_array)?>;
   const details = document.getElementById('detailsInput');
   if (details) {
-    details.addEventListener('input', function(){
-      const start = this.selectionStart;
-      const end = this.selectionEnd;
-      const lines = this.value.split('\n');
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
-        const skip = specialPrefixes.some(p => line.startsWith(p)) || /^[\t ]/.test(line);
-        if (!skip) {
-          lines[i] = line.replace(/^([A-Za-z])/, c => c.toUpperCase());
-        }
-      }
-      this.value = lines.join('\n');
-      this.selectionStart = start;
-      this.selectionEnd = end;
-    });
-    details.addEventListener('keydown', function(e) {
-      if (e.key === 'Tab') {
-        e.preventDefault();
-        const start = this.selectionStart;
-        const end = this.selectionEnd;
+      details.addEventListener('keydown', function(e) {
+        if (e.key === 'Tab') {
+          e.preventDefault();
+          const start = this.selectionStart;
+          const end = this.selectionEnd;
           this.value = this.value.slice(0, start) + "\t" + this.value.slice(end);
           this.selectionStart = this.selectionEnd = start + 1;
           scheduleSave();
