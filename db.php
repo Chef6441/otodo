@@ -12,7 +12,8 @@ function get_db() {
             username TEXT UNIQUE NOT NULL,
             password TEXT NOT NULL,
             location TEXT,
-            default_priority INTEGER NOT NULL DEFAULT 0
+            default_priority INTEGER NOT NULL DEFAULT 0,
+            special_prefixes TEXT NOT NULL DEFAULT 'T \nN \nX \nC \nM \n# \n## \n### '
         )");
 
         $db->exec("CREATE TABLE IF NOT EXISTS tasks (
@@ -45,6 +46,9 @@ function get_db() {
         }
         if (!in_array('default_priority', $userColumns, true)) {
             $db->exec('ALTER TABLE users ADD COLUMN default_priority INTEGER NOT NULL DEFAULT 0');
+        }
+        if (!in_array('special_prefixes', $userColumns, true)) {
+            $db->exec("ALTER TABLE users ADD COLUMN special_prefixes TEXT NOT NULL DEFAULT 'T \nN \nX \nC \nM \n# \n## \n### '");
         }
     }
     return $db;

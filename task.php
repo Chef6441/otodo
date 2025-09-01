@@ -48,6 +48,9 @@ $priority_classes = [
 ];
 $p = (int)($task['priority'] ?? 0);
 if ($p < 0 || $p > 3) { $p = 0; }
+$special_prefixes = $_SESSION['special_prefixes'] ?? "T \nN \nX \nC \nM \n# \n## \n### ";
+$prefixArray = array_values(array_filter(explode("\n", $special_prefixes), 'strlen'));
+usort($prefixArray, function($a, $b) { return strlen($b) - strlen($a); });
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -161,6 +164,7 @@ if ($p < 0 || $p > 3) { $p = 0; }
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 (function(){
+  const specialPrefixes = <?php echo json_encode($prefixArray); ?>;
   const select = document.querySelector('select[name="priority"]');
   const badge = document.getElementById('priorityBadge');
   if (select && badge) {
@@ -236,6 +240,33 @@ if ($p < 0 || $p > 3) { $p = 0; }
           }
           scheduleSave();
         }
+      });
+      details.addEventListener('input', function() {
+        const pos = this.selectionStart;
+        const lines = this.value.split('\n');
+        for (let i = 0; i < lines.length; i++) {
+          let line = lines[i];
+          const leading = line.match(/^[\t ]*/)[0];
+          let rest = line.slice(leading.length);
+          let prefix = '';
+          for (const p of specialPrefixes) {
+            if (rest.startsWith(p)) {
+              prefix = p;
+              rest = rest.slice(p.length);
+              break;
+            }
+          }
+          if (rest.length > 0) {
+            rest = rest.charAt(0).toUpperCase() + rest.slice(1);
+          }
+          lines[i] = leading + prefix + rest;
+        }
+        const newValue = lines.join('\n');
+        if (newValue !== this.value) {
+          this.value = newValue;
+          this.selectionStart = this.selectionEnd = pos;
+        }
+        scheduleSave();
       });
     }
 
