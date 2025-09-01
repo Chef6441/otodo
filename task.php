@@ -52,6 +52,7 @@ $special_prefixes = $_SESSION['special_prefixes'] ?? "T \nN \nX \nC \nM \n# \n##
 if (is_array($special_prefixes)) {
     $special_prefixes = implode("\n", $special_prefixes);
 }
+$special_prefixes = str_replace("\r", "", $special_prefixes);
 $prefixArray = array_values(array_filter(explode("\n", $special_prefixes), 'strlen'));
 usort($prefixArray, function($a, $b) { return strlen($b) - strlen($a); });
 ?>
