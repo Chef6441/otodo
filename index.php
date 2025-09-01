@@ -102,7 +102,7 @@ $tomorrowFmt = $tomorrow->format('Y-m-d');
                 }
             ?>
             <a href="task.php?id=<?=$task['id']?>" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                <span class="<?php if ($task['done']) echo 'text-decoration-line-through'; ?>"><?=htmlspecialchars(ucwords(strtolower($task['description'] ?? '')))?></span>
+                <span class="<?php if ($task['done']) echo 'text-decoration-line-through'; ?>"><?=htmlspecialchars($task['description'] ?? '')?></span>
                 <span class="d-flex align-items-center gap-2">
                     <span class="small due-date text-end <?=$dueClass?>"><?=htmlspecialchars($due)?></span>
                     <span class="badge <?=$priority_classes[$p]?> priority-badge"><?=$priority_labels[$p]?></span>
@@ -114,5 +114,12 @@ $tomorrowFmt = $tomorrow->format('Y-m-d');
 </div>
 <script src="sw-register.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="capitalize.js"></script>
+<script>
+const prefixes = <?php echo json_encode(get_prefixes()); ?>;
+document.addEventListener('DOMContentLoaded', function(){
+    setupAutoCapitalize(document.querySelector('input[name="description"]'), prefixes);
+});
+</script>
 </body>
 </html>
