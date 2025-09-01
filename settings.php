@@ -27,6 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $location = trim($_POST['location'] ?? '');
     $default_priority = (int)($_POST['default_priority'] ?? 0);
     $special_prefixes = str_replace("\r", "", $_POST['special_prefixes'] ?? $special_prefixes);
+
     if ($default_priority < 0 || $default_priority > 3) {
         $default_priority = 0;
     }
