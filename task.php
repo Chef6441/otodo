@@ -17,9 +17,9 @@ if (!$task) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $description = ucwords(strtolower(trim($_POST['description'] ?? '')));
+    $description = format_description(trim($_POST['description'] ?? ''));
     $due_date = trim($_POST['due_date'] ?? '');
-    $details = trim($_POST['details'] ?? '');
+    $details = format_description(trim($_POST['details'] ?? ''));
     $priority = (int)($_POST['priority'] ?? 0);
     if ($priority < 0 || $priority > 3) {
         $priority = 0;
@@ -130,7 +130,7 @@ if ($p < 0 || $p > 3) { $p = 0; }
     <form method="post">
         <div class="mb-3">
             <label class="form-label">Title</label>
-            <input type="text" name="description" class="form-control" value="<?=htmlspecialchars(ucwords(strtolower($task['description'] ?? '')))?>" required autocapitalize="none">
+            <input type="text" name="description" class="form-control" value="<?=htmlspecialchars($task['description'] ?? '')?>" required autocapitalize="none">
         </div>
         <div class="mb-3 d-flex align-items-end gap-3">
             <div>
@@ -159,7 +159,9 @@ if ($p < 0 || $p > 3) { $p = 0; }
     </form>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="capitalize.js"></script>
 <script>
+const prefixes = <?php echo json_encode(get_prefixes()); ?>;
 (function(){
   const select = document.querySelector('select[name="priority"]');
   const badge = document.getElementById('priorityBadge');
@@ -237,7 +239,7 @@ if ($p < 0 || $p > 3) { $p = 0; }
           scheduleSave();
         }
       });
-    }
+  }
 
   form.addEventListener('input', scheduleSave);
   form.addEventListener('change', scheduleSave);
@@ -247,6 +249,8 @@ if ($p < 0 || $p > 3) { $p = 0; }
       sendSave(true);
     }
   });
+    setupAutoCapitalize(document.querySelector('input[name="description"]'), prefixes);
+    setupAutoCapitalize(details, prefixes);
 })();
 </script>
 <script src="sw-register.js"></script>
