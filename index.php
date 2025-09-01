@@ -102,7 +102,7 @@ $tomorrowFmt = $tomorrow->format('Y-m-d');
                 }
             ?>
             <a href="task.php?id=<?=$task['id']?>" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                <span class="<?php if ($task['done']) echo 'text-decoration-line-through'; ?>"><?=htmlspecialchars(ucwords(strtolower($task['description'] ?? '')))?></span>
+                <span class="<?php if ($task['done']) echo 'text-decoration-line-through'; ?>"><?=htmlspecialchars($task['description'] ?? '')?></span>
                 <span class="d-flex align-items-center gap-2">
                     <span class="small due-date text-end <?=$dueClass?>"><?=htmlspecialchars($due)?></span>
                     <span class="badge <?=$priority_classes[$p]?> priority-badge"><?=$priority_labels[$p]?></span>
