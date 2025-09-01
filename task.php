@@ -196,18 +196,6 @@ if ($p < 0 || $p > 3) { $p = 0; }
   }
 
   const specialPrefixes = <?=json_encode($prefix_array)?>;
-  const title = document.querySelector('input[name="description"]');
-  if (title) {
-    title.addEventListener('input', function(){
-      const start = this.selectionStart;
-      let line = this.value;
-      const skip = specialPrefixes.some(p => line.startsWith(p)) || /^[\t ]/.test(line);
-      if (!skip) {
-        this.value = line.replace(/^([A-Za-z])/, c => c.toUpperCase());
-        this.selectionStart = this.selectionEnd = start;
-      }
-    });
-  }
   const details = document.getElementById('detailsInput');
   if (details) {
     details.addEventListener('input', function(){
