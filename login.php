@@ -21,9 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['username'] = $username;
             $_SESSION['location'] = $user['location'] ?? 'UTC';
             $_SESSION['default_priority'] = (int)($user['default_priority'] ?? 0);
-            $prefixes = $user['special_prefixes'] ?? "T \nN \nX \nC \nM \n# \n## \n### ";
-            $prefixes = str_replace("\r", "", $prefixes);
-            $_SESSION['special_prefixes'] = $prefixes;
+            $_SESSION['special_prefixes'] = $user['special_prefixes'] ?? "T \nN \nX \nC \nM \n# \n## \n### ";
             header('Location: index.php');
             exit();
         } else {

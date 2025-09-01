@@ -18,7 +18,6 @@ if ($special_prefixes === '') {
     $stmt->execute([':id' => $_SESSION['user_id']]);
     $special_prefixes = $stmt->fetchColumn() ?: "T \nN \nX \nC \nM \n# \n## \n### ";
 }
-$special_prefixes = str_replace("\r", "", $special_prefixes);
 $timezones = DateTimeZone::listIdentifiers();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -26,8 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $_POST['password'] ?? '';
     $location = trim($_POST['location'] ?? '');
     $default_priority = (int)($_POST['default_priority'] ?? 0);
-    $special_prefixes = str_replace("\r", "", $_POST['special_prefixes'] ?? $special_prefixes);
-
+    $special_prefixes = str_replace("\r\n", "\n", $_POST['special_prefixes'] ?? $special_prefixes);
     if ($default_priority < 0 || $default_priority > 3) {
         $default_priority = 0;
     }
@@ -60,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['username'] = $username;
             $_SESSION['location'] = $location !== '' ? $location : 'UTC';
             $_SESSION['default_priority'] = $default_priority;
-            $_SESSION['special_prefixes'] = str_replace("\r", "", $special_prefixes);
+            $_SESSION['special_prefixes'] = $special_prefixes;
             $message = 'Settings saved';
         } catch (PDOException $e) {
             $error = 'Username already taken';
