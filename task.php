@@ -187,7 +187,7 @@ if ($p < 0 || $p > 3) { $p = 0; }
   const detailsField = document.getElementById('detailsField');
   if (details && detailsField) {
       updateDetails = function() {
-        detailsField.value = details.textContent;
+        detailsField.value = details.innerText;
       };
       details.addEventListener('input', function(){
         updateDetails();
