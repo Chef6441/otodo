@@ -232,7 +232,17 @@ if ($p < 0 || $p > 3) { $p = 0; }
             const lineStart = textBefore.lastIndexOf('\n') + 1;
             const currentLine = textBefore.slice(lineStart);
             const leading = currentLine.match(/^[\t ]*/)[0];
-            document.execCommand('insertText', false, "\n" + leading);
+            const br = document.createElement('br');
+            const textNode = document.createTextNode(leading);
+            range.deleteContents();
+            range.insertNode(br);
+            range.setStartAfter(br);
+            range.collapse(true);
+            range.insertNode(textNode);
+            range.setStart(textNode, textNode.length);
+            range.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(range);
             updateDetails();
             scheduleSave();
           }
