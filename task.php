@@ -86,9 +86,6 @@ if ($p < 0 || $p > 3) { $p = 0; }
             background-color: inherit !important;
             color: inherit !important;
         }
-        #detailsInput {
-            white-space: pre-wrap;
-        }
         @media (min-width: 992px) {
             #detailsInput {
                 min-height: 30rem;
@@ -156,8 +153,7 @@ if ($p < 0 || $p > 3) { $p = 0; }
         </div>
         <div class="mb-3">
             <label class="form-label">Description</label>
-            <div id="detailsInput" class="form-control" contenteditable="true"><?=htmlspecialchars($task['details'] ?? '')?></div>
-            <input type="hidden" name="details" id="detailsField" value="<?=htmlspecialchars($task['details'] ?? '')?>">
+            <textarea id="detailsInput" name="details" class="form-control" rows="6"><?=htmlspecialchars($task['details'] ?? '')?></textarea>
         </div>
         <a href="index.php" class="btn btn-secondary">Back</a>
     </form>
@@ -181,64 +177,39 @@ if ($p < 0 || $p > 3) { $p = 0; }
   const form = document.querySelector('form');
   if (!form) return;
   let timer;
-
-  let updateDetails;
   const details = document.getElementById('detailsInput');
-  const detailsField = document.getElementById('detailsField');
-  if (details && detailsField) {
-      updateDetails = function() {
-        detailsField.value = details.textContent;
-      };
-      details.addEventListener('input', function(){
-        updateDetails();
-        scheduleSave();
-      });
-      details.addEventListener('paste', function(e){
-        e.preventDefault();
-        const text = e.clipboardData.getData('text/plain');
-        document.execCommand('insertText', false, text);
-        updateDetails();
-        scheduleSave();
-      });
+  if (details) {
+      details.addEventListener('input', scheduleSave);
       details.addEventListener('keydown', function(e) {
         if (e.key === 'Tab') {
           e.preventDefault();
-          document.execCommand('insertText', false, "\t");
-          updateDetails();
+          const start = details.selectionStart;
+          const end = details.selectionEnd;
+          details.value = details.value.slice(0, start) + "\t" + details.value.slice(end);
+          details.setSelectionRange(start + 1, start + 1);
           scheduleSave();
         } else if (e.key === ' ') {
-          const sel = window.getSelection();
-          if (sel && sel.rangeCount > 0) {
-            const range = sel.getRangeAt(0);
-            const node = range.startContainer;
-            const offset = range.startOffset;
-            if (node.nodeType === Node.TEXT_NODE && offset > 0 && node.textContent[offset-1] === ' ') {
-              e.preventDefault();
-              range.setStart(node, offset-1);
-              range.deleteContents();
-              document.execCommand('insertText', false, "\t");
-              updateDetails();
-              scheduleSave();
-            }
+          const pos = details.selectionStart;
+          if (pos === details.selectionEnd && pos > 0 && details.value.charAt(pos - 1) === ' ') {
+            e.preventDefault();
+            details.value = details.value.slice(0, pos - 1) + "\t" + details.value.slice(details.selectionEnd);
+            details.setSelectionRange(pos, pos);
+            scheduleSave();
           }
         } else if (e.key === 'Enter') {
           e.preventDefault();
-          const sel = window.getSelection();
-          if (sel && sel.rangeCount > 0) {
-            const range = sel.getRangeAt(0);
-            const preRange = range.cloneRange();
-            preRange.setStart(details, 0);
-            const textBefore = preRange.toString();
-            const lineStart = textBefore.lastIndexOf('\n') + 1;
-            const currentLine = textBefore.slice(lineStart);
-            const leading = currentLine.match(/^[\t ]*/)[0];
-            document.execCommand('insertText', false, "\n" + leading);
-            updateDetails();
-            scheduleSave();
-          }
+          const pos = details.selectionStart;
+          const textBefore = details.value.slice(0, pos);
+          const lineStart = textBefore.lastIndexOf('\n') + 1;
+          const currentLine = textBefore.slice(lineStart);
+          const leading = (currentLine.match(/^[\t ]*/) || [''])[0];
+          const insertText = "\n" + leading;
+          details.value = details.value.slice(0, pos) + insertText + details.value.slice(details.selectionEnd);
+          const newPos = pos + insertText.length;
+          details.setSelectionRange(newPos, newPos);
+          scheduleSave();
         }
       });
-      updateDetails();
   }
 
   function scheduleSave() {
@@ -247,7 +218,6 @@ if ($p < 0 || $p > 3) { $p = 0; }
   }
 
   function sendSave(immediate = false) {
-    if (updateDetails) updateDetails();
     const data = new FormData(form);
     if (immediate && navigator.sendBeacon) {
       navigator.sendBeacon(window.location.href, data);
